@@ -10,17 +10,28 @@ import java.util.NoSuchElementException;
  * 유지하는 데이터베이스이다. 
  */
 public class MovieDB {
+	
+	private MyLinkedList<Genre> genre_list;
+	
     public MovieDB() {
         // FIXME implement this
     	
     	// HINT: MovieDBGenre 클래스를 정렬된 상태로 유지하기 위한 
     	// MyLinkedList 타입의 멤버 변수를 초기화 한다.
+    	genre_list = new MyLinkedList<Genre>();
     }
 
-    public void insert(MovieDBItem item) {
+    public void insert(MovieDBItem item) { // 장르 추가 
         // FIXME implement this
         // Insert the given item to the MovieDB.
+    	String genreValue = item.getGenre();
+    	String titleValue = item.getTitle();
+    	
+    	Genre genre = new Genre(genreValue, item);
 
+    	MyLinkedList<MovieDBItem> tmpMovieList = genre.getGenreMovies();
+    	tmpMovieList.add(item);
+    	
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
         System.err.printf("[trace] MovieDB: INSERT [%s] [%s]\n", item.getGenre(), item.getTitle());
@@ -29,6 +40,23 @@ public class MovieDB {
     public void delete(MovieDBItem item) {
         // FIXME implement this
         // Remove the given item from the MovieDB.
+    	
+    	String genreValue = item.getGenre();
+    	String titleValue = item.getTitle(); 
+    	
+    	Genre genre = new Genre(genreValue, item);
+    	
+    	MyLinkedList<MovieDBItem> tmpMovieList = genre.getGenreMovies();
+    	
+    	Node<MovieDBItem> currNode = tmpMovieList.head; // 타입 정의가 이상한가? 
+    	Iterator<MovieDBItem> listIt = tmpMovieList.iterator();
+    	while(listIt.hasNext()) {
+    		currNode = currNode.getNext();
+    		if(currNode.getItem() == item) {
+    			listIt.remove(); // iterator에서 지워주나? 
+    		}
+    	}
+    	
     	
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
@@ -76,28 +104,81 @@ public class MovieDB {
     }
 }
 
+// 구현 
 class Genre extends Node<String> implements Comparable<Genre> {
-	public Genre(String name) {
+//	hashCode와 equals의 overriding을 위해 non-static field를 만들어줘야 함
+	
+	private String genreName; 
+	private MyLinkedList<MovieDBItem> genreMovies;
+	
+	public Genre(String name) { // print 시 사용?
 		super(name);
-		throw new UnsupportedOperationException("not implemented yet");
+		genreName = name; 
+		genreMovies = new MyLinkedList<>();
+	}
+	
+	public Genre(MovieDBItem item) { // search 시 사용?
+//		super(name);
+		
+	}
+	
+	public Genre(String name, MovieDBItem item) { // insert, delete 시 사용?
+		super(name);
+		genreName = name;
+		genreMovies = new MyLinkedList<>();
+	};
+
+	public String getGenreName() {
+		return genreName;
+	}
+
+	public void setGenreName(String genreName) {
+		this.genreName = genreName;
+	}
+
+	public MyLinkedList<MovieDBItem> getGenreMovies() {
+		return genreMovies;
+	}
+
+	public void setGenreMovies(MyLinkedList<MovieDBItem> genreMovies) {
+		this.genreMovies = genreMovies;
+	}
+
+	@Override
+	public int compareTo(Genre o) {
+		int nameDiff = genreName.compareToIgnoreCase(o.genreName);
+		return nameDiff;
 	}
 	
 	@Override
-	public int compareTo(Genre o) {
-		throw new UnsupportedOperationException("not implemented yet");
+	public int hashCode() { // genreName만 같으면 같은 genre 객체로 인식 
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((genreName == null) ? 0 : genreName.hashCode());
+		return result;
 	}
 
 	@Override
-	public int hashCode() {
-		throw new UnsupportedOperationException("not implemented yet");
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		throw new UnsupportedOperationException("not implemented yet");
+	public boolean equals(Object obj) { // equals로 같은 객체라면 반드시 hashCode도 같아야 함 (그렇지 않으면 중복 발생 위험) 
+		if (this == obj) 
+			return true;
+		if (obj == null) 
+			return false;
+		if (getClass() != obj.getClass()) 
+			return false;
+		Genre other = (Genre) obj;
+//		if (genreName != other.genreName)
+//			return false;
+		if (genreName == null) { 
+			if (other.genreName != null)  
+				return false;
+		} else if (!genreName.equals(other.genreName)) 
+			return false;
+		return true;
 	}
 }
 
+// 미사용 
 class MovieList implements ListInterface<String> {	
 	public MovieList() {
 	}

@@ -31,10 +31,15 @@ public class Node<T> {
     }
     
     public final void insertNext(T obj) {
-		throw new UnsupportedOperationException("not implemented yet");
+    	// 여기 구현     	
+    	Node newNode = new Node(obj); 
+    	newNode.setNext(this.getNext());
+    	this.setNext(newNode);
     }
     
     public final void removeNext() {
-		throw new UnsupportedOperationException("not implemented yet");
+    	// 여기 구현 
+    	Node nodeToBeDeleted = this.getNext();
+    	this.setNext(nodeToBeDeleted.getNext());
     }
 }

@@ -31,6 +31,7 @@ abstract class AbstractConsoleCommand implements ConsoleCommand {
 	 * 
 	 * 만약 어떤 명령이 별도의 해석 규칙이 필요한 경우 이 메소드를 직접 오버라이드하면 된다. 
 	 */
+	// AbstractConsoleCommand를 구현하는 모든 실체 클래스에서 동일하게 사용 
 	@Override
 	public void parse(String input) throws CommandParseException {
 		String[] args = input.split(" *% *%? *");
@@ -38,7 +39,7 @@ abstract class AbstractConsoleCommand implements ConsoleCommand {
 			args = new String[0];
 		// TIP: eclipse 에서 parseArguments 위에 커서를 올리고 Ctrl+T 를 누르면 해당 인터페이스를 
 		// 실제로 구현하고 있는 클래스들의 목록을 확인할 수 있고, 바로 이동할 수 있다.
-		parseArguments(args);
+		parseArguments(args); // 해당 추상 클래스를 구현한 실체 클래스들에서 실제로 오버라이드하여 쓰고 있는 메소드 
 	}
 
 	/**
@@ -51,6 +52,8 @@ abstract class AbstractConsoleCommand implements ConsoleCommand {
 	 * @param args 규칙에 맞게 분해된 명령 인자
 	 * @throws CommandParseException args가 명령의 규약에 맞지 않을 경우
 	 */
+	
+	// protected - 해당 추상 클래스를 구현한 실체 클래스에서 사용 가능, 사실상 지금 있는 추상 클래스에서 바로 사용할 수가 없기 때문에 오직 추상 클래스를 구현한 실체 클래스에서만 사용 가능 
 	protected abstract void parseArguments(String[] args) throws CommandParseException;
 }
 

@@ -52,7 +52,7 @@ public class MyLinkedList<T> implements ListInterface<T> {
 		while (last.getNext() != null) {
 			last = last.getNext();
 		}
-		last.insertNext(item);
+		last.insertNext(item); // list의 가장 뒤에 새 노드 삽입 
 		numItems += 1;
 	}
 

@@ -28,7 +28,13 @@ public class MovieDBItem implements Comparable<MovieDBItem> {
     @Override
     public int compareTo(MovieDBItem other) {
         // TODO delete the line below and implement this method
-        throw new UnsupportedOperationException();
+    	int genreDiff = genre.compareToIgnoreCase(other.genre);
+    	if(genreDiff != 0) return genreDiff;
+    	else {
+    		int titleDiff = title.compareToIgnoreCase(other.title);
+    		return titleDiff;
+    	}
+    	// 타이틀만 비교해야 되는 건가? 
     }
 
     @Override
