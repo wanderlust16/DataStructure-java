@@ -46,7 +46,7 @@ public class MovieDatabaseConsole {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 		// 프로그램에서 사용할 MovieDB 객체를 생성한다.
-		MovieDB db = new MovieDB();
+		MovieDB db = new MovieDB(); // 전체 프로세스에서 한번만 실행됨 
 
 		String input = null;
 		while (true) {
