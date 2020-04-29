@@ -30,14 +30,21 @@ public class MovieDB {
     	
     	Iterator<Genre> itr = genre_list.iterator();
     	while (itr.hasNext()) {
-    		System.out.println("start while loop");
     		Genre currGenre = itr.next();
     		if(currGenre.getGenreName().equals(genreValue)) {
     			System.out.println("genre already exists!");
     			genre = currGenre;
-    		} 
+    			Iterator<MovieDBItem> mvItr = genre.getGenreMovies().iterator();
+          		while (mvItr.hasNext()) {
+          			MovieDBItem currItem = mvItr.next();
+          			if (currItem.getTitle().equals(titleValue)) {
+          				System.out.println("movie alreay exists!");
+          				return; 
+          			}
+          		}
+    		} 	
     	}
-    	// 중복하는 장르가 없는 경우 
+    	// 일치하는 장르가 없는 경우 
     	if (genre == null) {
     		genre = new Genre(genreValue);
     		genre_list.add(genre);
@@ -45,7 +52,7 @@ public class MovieDB {
 
     	MyLinkedList<MovieDBItem> tmpMovieList = genre.getGenreMovies();
     	tmpMovieList.add(item);
-    	System.out.println("list size changed: " + tmpMovieList.size());
+    	System.out.println("current movie list size changed: " + tmpMovieList.size());
     	
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
@@ -53,83 +60,86 @@ public class MovieDB {
     }
 
     public void delete(MovieDBItem item) {
-        // FIXME implement this
-        // Remove the given item from the MovieDB.
-    	
     	String genreValue = item.getGenre();
     	String titleValue = item.getTitle(); 
+    	Genre genre = null;
     	
-    	Genre genre = new Genre(genreValue, item); // 다시 정의 필요 
-    	
-    	MyLinkedList<MovieDBItem> tmpMovieList = genre.getGenreMovies();
-    	
-    	Node<MovieDBItem> currNode = tmpMovieList.head; // 타입 정의가 이상한가? 
-    	Iterator<MovieDBItem> listIt = tmpMovieList.iterator();
-    	
-    	while(listIt.hasNext()) {
-    		currNode = currNode.getNext();
-    		if(currNode.getItem() == item) {
-    			listIt.remove(); // iterator에서 지워주나? 
-    		}
+    	Iterator<Genre> grItr = genre_list.iterator();
+    	while (grItr.hasNext()) {
+    		Genre currGenre = grItr.next();
+    		// 일치하는 장르를 찾음 
+    		if(currGenre.getGenreName().equals(genreValue)) {
+    			genre = currGenre;
+//    			break;
+    		} 		
     	}
     	
+    	// 일치하는 장르가 없는 경우 
+    	if (genre == null) {
+    		System.out.println("no such genre name!");
+    		return;
+    	}    	
     	
-    	// 참고: 생활코딩 
-//    	while(li.hasNext()){
-//    	    if((int)li.next() == 15)
-//    	        li.remove();
-//    	}
+		MyLinkedList<MovieDBItem> tmpMovieList = genre.getGenreMovies();
+       	Iterator<MovieDBItem> mvItr = tmpMovieList.iterator();
+    	
+    	while(mvItr.hasNext()) {
+//    		MovieDBItem currItem = mvItr.next();
+    		if(mvItr.next().getTitle().equals(titleValue)) {
+    			mvItr.remove(); 
+    	    	System.out.println("current list size changed: " + tmpMovieList.size());
+    	    	// 해당 장르의 마지막 영화가 삭제되면 해당 장르도 삭제...가 왜 되는 건지는 모르겠지만 
+    	    	if(tmpMovieList.size() == 0) {
+    	    		grItr.remove(); // 다음 장르 삭제하는 것 같음 
+    	        	System.out.println("genre list size changed: " + genre_list.size());
+    	    		return;
+    	    	}
+    		}	
+    	}
+    	
+    	System.out.println("genre list size changed: " + genre_list.size());
     	
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
         System.err.printf("[trace] MovieDB: DELETE [%s] [%s]\n", item.getGenre(), item.getTitle());
     }
 
-    public MyLinkedList<MovieDBItem> search(String term) {
-        // FIXME implement this
-        // Search the given term from the MovieDB.
-        // You should return a linked list of MovieDBItem.
-        // The search command is handled at SearchCmd class.
-    	
-    	// Printing search results is the responsibility of SearchCmd class. 
-    	// So you must not use System.out in this method to achieve specs of the assignment.
-    	
+    public MyLinkedList<MovieDBItem> search(String term) {	
         // This tracing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
     	System.err.printf("[trace] MovieDB: SEARCH [%s]\n", term);
     	
-    	// FIXME remove this code and return an appropriate MyLinkedList<MovieDBItem> instance.
-    	// This code is supplied for avoiding compilation error.   
         MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();
-
+        Iterator<Genre> grItr = genre_list.iterator();
+        
+        while(grItr.hasNext()) {
+        	Iterator<MovieDBItem> mvItr = grItr.next().getGenreMovies().iterator();
+        	while(mvItr.hasNext()) {
+        		MovieDBItem item = mvItr.next();
+        		if(item.getTitle().contains(term)) {
+        			results.add(item);
+        		}
+        	}
+        }
+        
         return results;
     }
     
     // printCmd 
     public MyLinkedList<MovieDBItem> items() { 
-        // FIXME implement this
-        // Search the given term from the MovieDatabase.
-        // You should return a linked list of QueryResult.
-        // The print command is handled at PrintCmd class.
-
-    	// Printing movie items is the responsibility of PrintCmd class. 
-    	// So you must not use System.out in this method to achieve specs of the assignment.
-
     	// Printing functionality is provided for the sake of debugging.
         // This code should be removed before submitting your work.
         System.err.printf("[trace] MovieDB: ITEMS\n");
-
-    	// FIXME remove this code and return an appropriate MyLinkedList<MovieDBItem> instance.
-    	// This code is supplied for avoiding compilation error.   
         
-        MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();
-                
-      	while(genre_list.iterator().hasNext()) { // 장르가 있을 때까지 
-        	Node<Genre> currGenre = genre_list.head.getNext(); // 장르 list의 첫 번째 노드 (head 바로 다음) 
-        	for(MovieDBItem item : currGenre.getItem().getGenreMovies()) {
-        		results.add(item);
-        	}
-        	currGenre = currGenre.getNext(); // genre_list의 모든 장르에 대하여 실행 
+        MyLinkedList<MovieDBItem> results = new MyLinkedList<MovieDBItem>();     
+        Iterator<Genre> grItr = genre_list.iterator();
+   
+      	while(grItr.hasNext()) { // 장르가 있을 때까지 
+      		Iterator<MovieDBItem> mvItr = grItr.next().getGenreMovies().iterator();
+  			while(mvItr.hasNext()) {
+  				MovieDBItem item = mvItr.next();
+  				results.add(item);
+  			}
         }
 
         return results;
