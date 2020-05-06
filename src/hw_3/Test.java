@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.LinkedList;
 import java.util.Stack;
+import java.util.Iterator;
 
 public class Test {
 	
@@ -34,8 +35,22 @@ public class Test {
 		calPost.offer("c");
 		calPost.poll();
 		
-		for(Object item : calPost) {
-			System.out.print(item);
+//		for(Object item : calPost) {
+//			System.out.print(item);
+//		}
+//		System.out.println(24*-24);
+//		System.out.println(24+-24);
+		
+		Stack<String> stack = new Stack<String>();
+		
+		stack.push("a");
+		stack.push("b");
+		stack.push("c");
+		
+		Iterator stackItr = stack.iterator();
+		
+		while(stackItr.hasNext() && !stackItr.next().equals("c")) {
+			System.out.print(stackItr.next());
 		}
 	}
 

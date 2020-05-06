@@ -57,14 +57,14 @@ public class CalculatorTest {
 			String tmpString = String.valueOf(input.charAt(i));
 		
 			// if negative(unary)
-			if(tmpString.equals("-") && (i == 0 || checkInt(String.valueOf(input.charAt(i-1))) == false)) { 
+			if(tmpString.equals("-") && (i == 0 || !checkLong(String.valueOf(input.charAt(i-1))))) { 
 				tmpString = "~";
 			} 
 			
 			// if number;
-			if(checkInt(tmpString)) {
+			if(checkLong(tmpString)) {
 				tmpNum.append(tmpString);
-				if(i == input.length()-1 || !checkInt(String.valueOf(input.charAt(i+1))) ) { // 더 이상 숫자가 아니라면 
+				if(i == input.length()-1 || !checkLong(String.valueOf(input.charAt(i+1))) ) { // 더 이상 숫자가 아니라면 
 					in2post.append(tmpNum.toString());
 					postStack.push(tmpNum.toString());
 					tmpNum = new StringBuilder(); // tmpNum을 비움 
@@ -73,7 +73,7 @@ public class CalculatorTest {
 			} 
 			
 			// if operator;
-			if(tmpString.equals("+") || tmpString.equals("-") || tmpString.equals("*") || tmpString.equals("/") || tmpString.equals("%") || tmpString.equals("~")) {
+			if(tmpString.equals("+") || tmpString.equals("-") || tmpString.equals("*") || tmpString.equals("/") || tmpString.equals("%")) {
 				if(inOpStack.isEmpty()) {
 					inOpStack.push(tmpString);
 				} else {
@@ -85,7 +85,7 @@ public class CalculatorTest {
 					}
 					inOpStack.push(tmpString);
 				}				
-			} else if(tmpString.equals("^") || tmpString.equals("(")) {
+			} else if(tmpString.equals("^") || tmpString.equals("(") || tmpString.equals("~")) {
 				inOpStack.push(tmpString);
 			} else if(tmpString.equals(")")) {
 				while(!inOpStack.peek().equals("(")) {
@@ -116,35 +116,38 @@ public class CalculatorTest {
 		while(stackItr.hasNext()) {
 			// if number 
 			String tmpVal = stackItr.next().toString();
-			if(checkInt(tmpVal)) { // 어차피 String인데 왜 또 String으로 type cast를 해야 하는지? 
+			if(checkLong(tmpVal)) { // 어차피 String인데 왜 또 String으로 type cast를 해야 하는지? 
 				calStack.push(tmpVal);
 			} else if(tmpVal.equals("+")){
-				int currCal = Integer.parseInt(calStack.pop()) + Integer.parseInt(calStack.pop());
-				calStack.push(Integer.toString(currCal));
+				long currCal = Long.parseLong(calStack.pop()) + Long.parseLong(calStack.pop());
+				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("-")) {
-				int secondNum = Integer.parseInt(calStack.pop());
-				int firstNum = Integer.parseInt(calStack.pop());
-				int currCal = firstNum - secondNum;
-				calStack.push(Integer.toString(currCal));
+				long secondNum = Long.parseLong(calStack.pop());
+				long firstNum = Long.parseLong(calStack.pop());
+				long currCal = firstNum - secondNum;
+				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("*")) {
-				int currCal = Integer.parseInt(calStack.pop()) * Integer.parseInt(calStack.pop());
-				calStack.push(Integer.toString(currCal));
+				long currCal = Long.parseLong(calStack.pop()) * Long.parseLong(calStack.pop());
+				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("/")) {
-				int secondNum = Integer.parseInt(calStack.pop());
-				int firstNum = Integer.parseInt(calStack.pop());
-				int currCal = firstNum / secondNum;
-				calStack.push(Integer.toString(currCal));
+				long secondNum = Long.parseLong(calStack.pop());
+				long firstNum = Long.parseLong(calStack.pop());
+				long currCal = firstNum / secondNum;
+				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("%")) {
-				int secondNum = Integer.parseInt(calStack.pop());
-				int firstNum = Integer.parseInt(calStack.pop());
-				int currCal = firstNum % secondNum;				calStack.push(Integer.toString(currCal));
+				long secondNum = Long.parseLong(calStack.pop());
+				long firstNum = Long.parseLong(calStack.pop());
+				long currCal = firstNum % secondNum;
+				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("^")) {
-				int secondNum = Integer.parseInt(calStack.pop());
-				int firstNum = Integer.parseInt(calStack.pop());
-				int currCal = (int)Math.pow(firstNum, secondNum);
-				calStack.push(Integer.toString(currCal));
-			} else if(tmpVal == "~") {
-				
+				long secondNum = Long.parseLong(calStack.pop());
+				long firstNum = Long.parseLong(calStack.pop());
+				long currCal = (long)Math.pow(firstNum, secondNum);
+				calStack.push(Long.toString(currCal));
+			} else if(tmpVal.equals("~")) {
+				long currNum = Long.parseLong(calStack.pop());
+				currNum = (-1) * currNum;
+				calStack.push(Long.toString(currNum));
 			} else {
 				System.out.println("wrong cal");
 			}
@@ -154,13 +157,8 @@ public class CalculatorTest {
 		System.out.println(calStack.pop());
 	}
 	
-	private static boolean checkInt(String value) {
-		try {
-			int num = Integer.parseInt(value);
-			return true;
-		} catch(NumberFormatException e) {
-			return false;
-		}
+	private static long countUnary(Stack<String> postStack, Stack<String> calStack) {
+		return 1;
 	}
 	
 	private static boolean checkLong(String value) {
