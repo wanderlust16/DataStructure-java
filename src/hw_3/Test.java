@@ -1,11 +1,15 @@
 package hw_3;
+
 import java.util.HashMap;
+import java.util.Queue;
+import java.util.LinkedList;
 import java.util.Stack;
 
 public class Test {
 	
 	public static void main(String[] args) {
 		HashMap<String, Integer> testMap = new HashMap<String, Integer>();
+		Queue<Object> calPost = new LinkedList<Object>();
 		
 		testMap.put("+", 1);
 		testMap.put("-", 1);
@@ -23,7 +27,16 @@ public class Test {
 		opStack.push("1");
 		opStack.push("2");
 		opStack.push("3");
-		System.out.print(opStack.pop());
+//		System.out.print(opStack.pop());
+		
+		calPost.offer("a");
+		calPost.offer("b");
+		calPost.offer("c");
+		calPost.poll();
+		
+		for(Object item : calPost) {
+			System.out.print(item);
+		}
 	}
 
 	
