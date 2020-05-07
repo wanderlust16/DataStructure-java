@@ -46,14 +46,24 @@ public class CalculatorTest {
 		opMap.put("^", 4);
 		opMap.put("(", 5);
 		opMap.put(")", 5);
+		
+		String operators = "+-*/%^";
 				
 		Stack<String> inOpStack = new Stack<String>();
 		Stack<String> postStack = new Stack<String>();
-		StringBuilder in2post = new StringBuilder();
 		
 		StringBuilder tmpNum = new StringBuilder(); // 2자리 수 이상의 숫자일 경우 
-				
+						
 		for(int i=0; i<input.length(); i++) {
+			if(i<input.length()-1) {
+				String firstVal = String.valueOf(input.charAt(i));
+				String secondVal = String.valueOf(input.charAt(i+1));
+				if(operators.contains(firstVal) && operators.contains(secondVal)) {
+					System.out.println("ERROR");
+					System.exit(0);
+				}
+			}
+			
 			String tmpString = String.valueOf(input.charAt(i));
 		
 			// if negative(unary)
@@ -65,7 +75,6 @@ public class CalculatorTest {
 			if(checkLong(tmpString)) {
 				tmpNum.append(tmpString);
 				if(i == input.length()-1 || !checkLong(String.valueOf(input.charAt(i+1))) ) { // 더 이상 숫자가 아니라면 
-					in2post.append(tmpNum.toString());
 					postStack.push(tmpNum.toString());
 					tmpNum = new StringBuilder(); // tmpNum을 비움 
 				}
@@ -79,7 +88,6 @@ public class CalculatorTest {
 				} else {
 					while(opMap.get(inOpStack.peek()) >= opMap.get(tmpString) && !inOpStack.peek().equals("(")) {
 						String tmpOp = inOpStack.pop();
-						in2post.append(tmpOp);
 						postStack.push(tmpOp);
 						if(inOpStack.isEmpty()) break;
 					}
@@ -90,7 +98,6 @@ public class CalculatorTest {
 			} else if(tmpString.equals(")")) {
 				while(!inOpStack.peek().equals("(")) {
 					String tmpOp = inOpStack.pop();
-					in2post.append(tmpOp);
 					postStack.push(tmpOp);
 				}
 				inOpStack.pop(); // delete "("
@@ -101,10 +108,9 @@ public class CalculatorTest {
 		
 		while(!inOpStack.isEmpty()) {
 			String tmpOp = inOpStack.pop();
-			in2post.append(tmpOp);
 			postStack.push(tmpOp);
 		}
-//		System.out.println(in2post); // 아래와 같음 (아래처럼 쓸 시 in2post는 필요 X 
+
 		for(Object item : postStack) {
 			System.out.print(item + " ");
 		}
@@ -132,16 +138,28 @@ public class CalculatorTest {
 			} else if(tmpVal.equals("/")) {
 				long secondNum = Long.parseLong(calStack.pop());
 				long firstNum = Long.parseLong(calStack.pop());
+				if(secondNum == 0) {
+					System.out.println("ERROR");
+					System.exit(0);
+				}
 				long currCal = firstNum / secondNum;
 				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("%")) {
 				long secondNum = Long.parseLong(calStack.pop());
 				long firstNum = Long.parseLong(calStack.pop());
+				if(secondNum == 0) {
+					System.out.println("ERROR");
+					System.exit(0);
+				}
 				long currCal = firstNum % secondNum;
 				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("^")) {
 				long secondNum = Long.parseLong(calStack.pop());
 				long firstNum = Long.parseLong(calStack.pop());
+				if(secondNum < 0) {
+					System.out.println("ERROR");
+					System.exit(0);
+				}
 				long currCal = (long)Math.pow(firstNum, secondNum);
 				calStack.push(Long.toString(currCal));
 			} else if(tmpVal.equals("~")) {
@@ -153,12 +171,8 @@ public class CalculatorTest {
 			}
 		}
 		
-//		System.out.println(calStack.size()); // 1이 나와야 함... 성공 
+//		System.out.println(calStack.size()); // 1이 나와야 함 
 		System.out.println(calStack.pop());
-	}
-	
-	private static long countUnary(Stack<String> postStack, Stack<String> calStack) {
-		return 1;
 	}
 	
 	private static boolean checkLong(String value) {
