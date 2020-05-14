@@ -120,6 +120,19 @@ public class SortingTest
 	private static int[] DoInsertionSort(int[] value)
 	{
 		// TODO : Insertion Sort 를 구현하라.
+		for(int i=1; i<value.length; i++) {
+			for(int j=0; j<i; j++) {
+				if(value[j] > value[i]) {
+					int tmp = value[i]; 
+					for(int k=i-1; k>=j; k--) {
+						value[k+1] = value[k];
+					}
+					value[j] = tmp;
+					break;
+				}
+			}
+		}
+	
 		return (value);
 	}
 
@@ -133,8 +146,42 @@ public class SortingTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoMergeSort(int[] value)
 	{
-		// TODO : Merge Sort 를 구현하라.
+		// TODO : Merge Sort 를 구현하라.		
+		sort(value, 0, value.length-1);
 		return (value);
+	}
+	
+	private static void sort(int[] arr, int low, int high) {
+		if(high <= low) {
+			return;
+		} 
+		int mid = (high + low) / 2;
+		sort(arr, low, mid);
+		sort(arr, mid+1, high);
+		merge(arr, low, mid, high);
+	}
+		
+	private static void merge(int[] arr, int low, int mid, int high) {
+		int[] tmpArr = new int[high - low + 1];
+		int i=low, j=mid+1, idx=0;
+		
+		while(i <= mid && j <= high) {
+			if(arr[i] < arr[j]) {
+				tmpArr[idx++] = arr[i++];
+			} else {
+				tmpArr[idx++] = arr[j++];
+			}
+		}
+		
+		while(i <= mid) {
+			tmpArr[idx++] = arr[i++];
+		}
+		
+		while(j <= high) {
+			tmpArr[idx++] = arr[j++];
+		}
+		
+		System.arraycopy(tmpArr, 0, arr, low, tmpArr.length);
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
