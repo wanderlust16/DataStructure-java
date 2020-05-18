@@ -98,7 +98,6 @@ public class SortingTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoBubbleSort(int[] value)
 	{
-		// TODO : Bubble Sort 를 구현하라.
 		// value는 정렬안된 숫자들의 배열이며 value.length 는 배열의 크기가 된다.
 		// 결과로 정렬된 배열은 리턴해 주어야 하며, 두가지 방법이 있으므로 잘 생각해서 사용할것.
 		// 주어진 value 배열에서 안의 값만을 바꾸고 value를 다시 리턴하거나
@@ -119,7 +118,6 @@ public class SortingTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoInsertionSort(int[] value)
 	{
-		// TODO : Insertion Sort 를 구현하라.
 		for(int i=1; i<value.length; i++) {
 			for(int j=0; j<i; j++) {
 				if(value[j] > value[i]) {
@@ -139,25 +137,57 @@ public class SortingTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoHeapSort(int[] value)
 	{
-		// TODO : Heap Sort 를 구현하라.
+		// heap building 이후 최종적인 sorting만 해주는 곳 
+		heapSort(value, value.length-1);
 		return (value);
 	}
 
+	private static void heapSort(int[] arr, int n) {
+		int parent;
+		parent = n % 2 == 0 ? n/2-1 : n/2;
+		for(int i=parent; i>=0; i--) {
+			percolateDown(arr, i, n);
+		}
+
+		// after building heap 
+		for(int i=n; i>=1; i--) {
+			int tmp = arr[0];
+			arr[0] = arr[i];
+			arr[i] = tmp;
+			percolateDown(arr, 0, i-1);
+		}
+	}
+	
+	private static void percolateDown(int[] arr, int i, int n) {
+		int child = 2*i+1;
+		int rightChild = 2*i+2;
+		if(child <= n) {
+			if((rightChild <= n) && (arr[child] < arr[rightChild])) {
+				child = rightChild;
+			}
+			if(arr[i] < arr[child]) {
+				int tmp = arr[i];
+				arr[i] = arr[child];
+				arr[child] = tmp;
+				percolateDown(arr, child, n);
+			}
+		}
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoMergeSort(int[] value)
 	{
-		// TODO : Merge Sort 를 구현하라.		
-		sort(value, 0, value.length-1);
+		mergeSort(value, 0, value.length-1);
 		return (value);
 	}
 	
-	private static void sort(int[] arr, int low, int high) {
+	private static void mergeSort(int[] arr, int low, int high) {
 		if(high <= low) {
 			return;
 		} 
 		int mid = (high + low) / 2;
-		sort(arr, low, mid);
-		sort(arr, mid+1, high);
+		mergeSort(arr, low, mid);
+		mergeSort(arr, mid+1, high);
 		merge(arr, low, mid, high);
 	}
 		
@@ -187,14 +217,126 @@ public class SortingTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoQuickSort(int[] value)
 	{
-		// TODO : Quick Sort 를 구현하라.
+        quickSort(value, 0, value.length - 1);
 		return (value);
+	}
+	
+	private static void quickSort(int[] arr, int low, int high) {
+		if(high <= low) {
+			return;
+		}
+		int mid = partition(arr, low, high);
+		quickSort(arr, low, mid-1);
+		quickSort(arr, mid, high);
+	}
+	
+	private static int partition(int[] arr, int low, int high) {
+		int mid = (low + high) / 2;
+		while(low <= high) {
+			while(arr[low] < arr[mid]) low++;
+			while(arr[high] > arr[mid]) high--;
+			if(low <= high) {
+				int tmp = arr[low];
+				arr[low] = arr[high];
+				arr[high] = tmp;
+				
+				low++;
+				high--;
+			}
+		}	
+		return low;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	private static int[] DoRadixSort(int[] value)
 	{
-		// TODO : Radix Sort 를 구현하라.
+		ArrayList<Integer> negArr = new ArrayList<Integer>();
+		ArrayList<Integer> posArr = new ArrayList<Integer>();
+		
+		// negative nums 
+		for(int i=0; i<value.length; i++) {
+			if(String.valueOf(Integer.toString(value[i]).charAt(0)) == "-") {
+				negArr.add(value[i]);
+			} else {
+				posArr.add(value[i]);
+			}
+		}
+		
+		int[] negNums = new int[negArr.size()];
+		int negSize = 0;
+		for(int tmp : negArr) {
+			negNums[negSize++] = tmp;
+		}
+		
+		int[] posNums = new int[posArr.size()];
+		int posSize = 0;
+		for(int tmp : posArr) {
+			posNums[posSize++] = tmp;
+		}
+		
+		
+		// get the biggest number 
+		int max = value[0];
+		for(int i=0; i<value.length; i++) {
+			if(max < value[i]) {
+				max = value[i];
+			}
+		}
+		
+		int maxRadix = (int)(Math.log10(max))+1; // 가장 큰 자릿수 
+		
+//		int[][] tmpArr = new int[10][value.length]; // 자리수별 stack 
+//		ArrayList<Integer> output = new ArrayList<Integer>(); // 임시 arraylist  
+		
+		ArrayList<Integer>[] tmpArr = new ArrayList[10];
+		
+		int count = 0;
+		while(count < maxRadix) {
+			System.out.println("max" + maxRadix);
+			System.out.println("filling"); 
+
+			for(int i=0; i<value.length; i++) {
+				int currNum = value[i] / (int)Math.pow(10, count);
+				int r = currNum % 10;	
+//				tmpArr[r][i] = value[i];
+				// 중간에 빈 공간이 생기긴 하지만 i가 계속 올라가며, value.length 이상으로는 올라가지 않음
+				// 중간에 생기는 빈 공간 메꿔주기?
+				tmpArr[r].add(value[i]);
+			}
+			
+//			for(int i=0; i<10; i++) {
+//				for(int j=0; j<value.length; j++) {
+//					System.out.print(tmpArr[i][j] + " ");
+//				}
+//				System.out.println();
+//			}
+
+			// value를 tmpArr값으로 순차적으로 채워준 후 tmpArr 비우기 
+//			int k = 0;
+//			for(int i=0; i<10; i++) {
+//				for(int j=0; j<value.length; j++) {
+////					output.add(tmpArr[i][j]);
+//					if(tmpArr[i][j] != 0) value[k] = tmpArr[i][j];
+//					if(k < value.length-1) k++;
+//				}
+//			}
+			
+			int k = 0;
+			for(int i=0; i<10; i++) {
+				for(int j=0; j<tmpArr[i].size(); j++) {
+					value[k] = tmpArr[i].get(j);
+					if(k < value.length-1) k++;
+				}
+			}
+			
+			// make array empty
+			Arrays.fill(tmpArr, null);
+			count++;
+		}
 		return (value);
 	}
+	
+//	private static int[] radixSort(int[] arr) {
+//		
+//	}
 }
