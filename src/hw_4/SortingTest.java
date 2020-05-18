@@ -253,9 +253,8 @@ public class SortingTest
 		ArrayList<Integer> negArr = new ArrayList<Integer>();
 		ArrayList<Integer> posArr = new ArrayList<Integer>();
 		
-		// negative nums 
 		for(int i=0; i<value.length; i++) {
-			if(String.valueOf(Integer.toString(value[i]).charAt(0)) == "-") {
+			if(String.valueOf(Integer.toString(value[i]).charAt(0)).equals("-")) {
 				negArr.add(value[i]);
 			} else {
 				posArr.add(value[i]);
@@ -267,13 +266,40 @@ public class SortingTest
 		for(int tmp : negArr) {
 			negNums[negSize++] = tmp;
 		}
-		
+
 		int[] posNums = new int[posArr.size()];
 		int posSize = 0;
 		for(int tmp : posArr) {
 			posNums[posSize++] = tmp;
+		}	
+		
+		if(negNums.length > 0 && posNums.length > 0) {
+			int[] negSorted = radixSort(negNums);
+			int[] posSorted = radixSort(posNums);
+			System.arraycopy(negSorted, 0, value, 0, negSorted.length);
+			System.arraycopy(posSorted, 0, value, negSorted.length, posSorted.length);
+		} else if(negNums.length > 0 && posNums.length == 0) {
+			int[] negSorted = radixSort(negNums);
+			System.arraycopy(negSorted, 0, value, 0, negSorted.length);
+		} else {
+			int[] posSorted = radixSort(posNums);
+			System.arraycopy(posSorted, 0, value, 0, posSorted.length);
 		}
 		
+		return (value);
+	}
+	
+	private static int[] radixSort(int[] value) {
+		
+		boolean isPos = true;
+		
+		// check if neg array
+		if(value[0] < 0) {
+			isPos = false;
+			for(int i=0; i<value.length; i++) {
+				value[i] *= (-1); // 일단 음수로 바꿔줌 
+			}
+		}
 		
 		// get the biggest number 
 		int max = value[0];
@@ -282,14 +308,14 @@ public class SortingTest
 				max = value[i];
 			}
 		}
-		
+					
 		int maxRadix = (int)(Math.log10(max))+1; // 가장 큰 자릿수 
-		
-//		int[][] tmpArr = new int[10][value.length]; // 자리수별 stack 
-//		ArrayList<Integer> output = new ArrayList<Integer>(); // 임시 arraylist  
-		
+	
 		ArrayList<Integer>[] tmpArr = new ArrayList[10];
-		
+		for(int i=0; i<10; i++) {
+			tmpArr[i] = new ArrayList<Integer>();
+		}
+				
 		int count = 0;
 		while(count < maxRadix) {
 			System.out.println("max" + maxRadix);
@@ -298,29 +324,9 @@ public class SortingTest
 			for(int i=0; i<value.length; i++) {
 				int currNum = value[i] / (int)Math.pow(10, count);
 				int r = currNum % 10;	
-//				tmpArr[r][i] = value[i];
-				// 중간에 빈 공간이 생기긴 하지만 i가 계속 올라가며, value.length 이상으로는 올라가지 않음
-				// 중간에 생기는 빈 공간 메꿔주기?
 				tmpArr[r].add(value[i]);
 			}
-			
-//			for(int i=0; i<10; i++) {
-//				for(int j=0; j<value.length; j++) {
-//					System.out.print(tmpArr[i][j] + " ");
-//				}
-//				System.out.println();
-//			}
-
-			// value를 tmpArr값으로 순차적으로 채워준 후 tmpArr 비우기 
-//			int k = 0;
-//			for(int i=0; i<10; i++) {
-//				for(int j=0; j<value.length; j++) {
-////					output.add(tmpArr[i][j]);
-//					if(tmpArr[i][j] != 0) value[k] = tmpArr[i][j];
-//					if(k < value.length-1) k++;
-//				}
-//			}
-			
+								
 			int k = 0;
 			for(int i=0; i<10; i++) {
 				for(int j=0; j<tmpArr[i].size(); j++) {
@@ -328,15 +334,26 @@ public class SortingTest
 					if(k < value.length-1) k++;
 				}
 			}
-			
+					
 			// make array empty
-			Arrays.fill(tmpArr, null);
+			for(int i=0; i<10; i++) {
+				tmpArr[i].clear();
+			}
 			count++;
 		}
+		
+		// reverse array if it's neg array		
+		if(!isPos) {			
+			for(int i=0; i<value.length; i++) {
+				value[i] *= (-1);
+			}
+			for(int i=0; i<value.length/2; i++) {
+				int tmp = value[i];
+				value[i] = value[value.length-i-1];
+				value[value.length-i-1] = tmp;
+			}
+		}
+		
 		return (value);
 	}
-	
-//	private static int[] radixSort(int[] arr) {
-//		
-//	}
 }
