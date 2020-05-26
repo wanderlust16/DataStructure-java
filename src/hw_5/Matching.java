@@ -26,20 +26,43 @@ public class Matching
 		}
 	}
 
-	private static void command(String input)
+	private static void command(String input) {
+		String commandSign = String.valueOf(input.charAt(0));
+		String filePath = input.substring(2);
+		
+		if(commandSign.equals("<")) inputData(filePath);
+		else if(commandSign.equals("@")) printData(input);
+		else if(commandSign.equals("?")) searchPattern(input);
+	}
+	
+	public static void convertFile(String fileName) throws IOException {
+		
+		File file = new File(fileName);
+		FileReader fReader = new FileReader(file);
+		if(file.exists()) {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line; 
+			while((line = br.readLine()) != null) {
+				inputData(line);
+			}
+		}
+	}
+	
+	public static void inputData(String input)
 	{
 		// TODO : 아래 문장을 삭제하고 구현해라.
 //		System.out.println("<< command 함수에서 " + input + " 명령을 처리할 예정입니다 >>");
-		Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>();
-//		h.put(key, value);
-
+		
+		final int TABEL_SIZE = 100;
+		Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
+		
 		// extract substring from input 
 		int i = 0;
-		final int k = 6;
-		for(int j=0; j<=input.length()-k; j++) {
+		final int K = 6;
+		for(int j=0; j<=input.length()-K; j++) {
 //			System.out.print(input.substring(j, j+k));
 			i++;
-			String sixStr = input.substring(j, j+k);
+			String sixStr = input.substring(j, j+K);
 			int key = 0;
 			for(int l=0; l<sixStr.length(); l++) {
 				key += sixStr.charAt(l);
@@ -48,50 +71,103 @@ public class Matching
 //			System.out.println(key);
 			if(h.get(key).isEmpty()) {
 				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
-//				AVLTree hashTree = new AVLTree(new TreeNode(new LinkedList<ListNode>()));
-				AVLTree hashTree = new AVLTree(treeNode);
+				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
 				h.put(key, hashTree);
 				
 			} else {
-//				h.get(key).insert(new TreeNode(new LinkedList<ListNode>()));
-				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
-				h.get(key).insert(treeNode);
+				TreeNode treeNode = new TreeNode(sixStr, i, j+1); // same tree, diff node
+				ListNode listNode = new ListNode(i, j+1); 
+				TreeNode currRoot = h.get(key).getRoot();
+				h.get(key).insert(currRoot, treeNode, listNode);
 			}
 		}
+	}
+	
+	public static void printData(String input) {
+		
+	}
+	
+	public static void searchPattern(String input) {
+		
 	}
 }
 
 class AVLTree<T> {
 	private TreeNode<T> root;
 	
-	public AVLTree() {
-		root = null;
-	}
+//	public AVLTree() {
+//		root = null;
+//	}
 	
 	public AVLTree(TreeNode<T> root) {
-		super();
+//		super();
 		this.root = root;
 	}
+	
+	public TreeNode<T> getRoot() {
+		return root;
+	}
 
-	public void insert(TreeNode<T> item) {
-		
+	public void setRoot(TreeNode<T> root) {
+		this.root = root;
 	}
 	
+	public void insert(TreeNode<T> currNode, TreeNode<T> newTreeNode, ListNode<T> newListNode) {
+		if(currNode == null) { // currNode refers to root at first
+			currNode = newTreeNode;
+			return;
+		}
+		
+		// java String: lesser when it comes earlier		
+		if(newTreeNode.getValue().compareTo(currNode.getValue()) == -1) { // if new item is smaller than curr
+			
+			// insert left
+			currNode = currNode.getLeftChild();
+			insert(currNode, newTreeNode, newListNode);
+			
+			// rotate if needed
+			if(currNode.getLeftHeight() > currNode.getRightHeight() + 1) {
+				this.rotateRight(currNode);
+			}
+		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) == 1) { // if new item is larger than curr
+			
+			// insert right
+			currNode = currNode.getRightChild();
+			insert(currNode, newTreeNode, newListNode);
+			
+			// rotate if needed
+			if(currNode.getRightHeight() > currNode.getLeftHeight() + 1) {
+				this.rotateLeft(currNode);
+			}			
+		} else { // if new item is equal to current node
+			currNode.getItemList().add(newListNode);
+		}
+	}
+
 	public boolean isEmpty() {
 		return root == null;
+	}
+
+//	public TreeNode<T> search(TreeNode<T> currNode) {
+//		
+//	}
+	
+	public void rotateLeft(TreeNode<T> currNode) {
+		TreeNode<T> tmpNode = this.root;
+		this.root = this.root.getRightChild();
+		this.root.setLeftChild(tmpNode);
+	}
+	
+	public void rotateRight(TreeNode<T> currNode) {
+		TreeNode<T> tmpNode = this.root;
+		this.root = this.root.getLeftChild();
+		this.root.setRightChild(tmpNode);
 	}
 	
 	public void traverse() {
 		
 	}
 	
-	public void rotateLeft() {
-		
-	}
-	
-	public void rotateRight() {
-		
-	}
 }
 
 class TreeNode<T> {	
@@ -106,18 +182,17 @@ class TreeNode<T> {
 		this.value = value;
 		this.itemList = new LinkedList<ListNode>();
 		ListNode nodeItem = new ListNode(i, j);
+		
+		// add to linkedlist right after tree node is created
 		itemList.add(nodeItem);
 	}
 	
-	public TreeNode(LinkedList<ListNode> itemList) {
-		this.itemList = itemList;
-	}	
-	
-	public TreeNode(LinkedList<ListNode> itemList, TreeNode<T> leftChild, TreeNode<T> rightChild) {
-		super();
-		this.itemList = itemList;
-		this.leftChild = leftChild;
-		this.rightChild = rightChild;
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	public LinkedList<ListNode> getItemList() {
@@ -144,21 +219,19 @@ class TreeNode<T> {
 		this.rightChild = rightChild;
 	}
 
+	// dunno
 	public int getLeftHeight() {
+		if (this == null) return -1;
+		this.leftHeight = 1 + Math.max(this.getLeftChild().getLeftHeight(), this.getLeftChild().getRightHeight());
 		return leftHeight;
 	}
 
-	public void setLeftHeight(int leftHeight) {
-		this.leftHeight = leftHeight;
-	}
-
 	public int getRightHeight() {
+		if (this == null) return -1;
+		this.rightHeight = 1 + Math.max(this.getRightChild().getLeftHeight(), this.getRightChild().getRightHeight());
 		return rightHeight;
 	}
 
-	public void setRightHeight(int rightHeight) {
-		this.rightHeight = rightHeight;
-	}
 }
 
 class ListNode<T> {
