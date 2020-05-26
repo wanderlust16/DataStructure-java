@@ -47,19 +47,26 @@ public class Matching
 			key %= 100;
 //			System.out.println(key);
 			if(h.get(key).isEmpty()) {
-				AVLTree hashTree = new AVLTree(new TreeNode(new LinkedList<ListNode>()));
+				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
+//				AVLTree hashTree = new AVLTree(new TreeNode(new LinkedList<ListNode>()));
+				AVLTree hashTree = new AVLTree(treeNode);
 				h.put(key, hashTree);
 				
 			} else {
-				h.get(key).insert(new TreeNode(new LinkedList<ListNode>()));
+//				h.get(key).insert(new TreeNode(new LinkedList<ListNode>()));
+				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
+				h.get(key).insert(treeNode);
 			}
 		}
 	}
-	
 }
 
 class AVLTree<T> {
 	private TreeNode<T> root;
+	
+	public AVLTree() {
+		root = null;
+	}
 	
 	public AVLTree(TreeNode<T> root) {
 		super();
@@ -88,16 +95,23 @@ class AVLTree<T> {
 }
 
 class TreeNode<T> {	
-//	private String key;
+	private String value;
 	private LinkedList<ListNode> itemList;
 	private TreeNode<T> leftChild;
-	private TreeNode<T> rightChild;
+	private TreeNode<T> rightChild;	
 	private int leftHeight;
 	private int rightHeight;
 	
+	public TreeNode(String value, int i, int j) {
+		this.value = value;
+		this.itemList = new LinkedList<ListNode>();
+		ListNode nodeItem = new ListNode(i, j);
+		itemList.add(nodeItem);
+	}
+	
 	public TreeNode(LinkedList<ListNode> itemList) {
 		this.itemList = itemList;
-	}
+	}	
 	
 	public TreeNode(LinkedList<ListNode> itemList, TreeNode<T> leftChild, TreeNode<T> rightChild) {
 		super();
@@ -107,7 +121,7 @@ class TreeNode<T> {
 	}
 
 	public LinkedList<ListNode> getItemList() {
-		return itemList;
+		return itemList;	
 	}
 
 	public void setItemList(LinkedList<ListNode> itemList) {
@@ -148,12 +162,12 @@ class TreeNode<T> {
 }
 
 class ListNode<T> {
-	private String item;
+//	private String item;
 	private int i;
 	private int j;
 	
-	public ListNode(String item, int i, int j) {
-		this.item = item;
+	public ListNode(int i, int j) {
+//		this.item = item;
 		this.i = i;
 		this.j = j;
 	}
