@@ -16,7 +16,6 @@ public class Matching
 				String input = br.readLine();
 				if (input.compareTo("QUIT") == 0)
 					break;
-
 				command(input);
 			}
 			catch (IOException e)
@@ -26,42 +25,44 @@ public class Matching
 		}
 	}
 
-	private static void command(String input) {
+	private static void command(String input) throws IOException {
 		String commandSign = String.valueOf(input.charAt(0));
-		String filePath = input.substring(2);
+		String filePath = input.substring(2); // user later(file input)
+//		input = input.substring(2); 
 		
-		if(commandSign.equals("<")) inputData(filePath);
+		if(commandSign.equals("<")) convertFile(filePath);
+//		int i = 1;
+//		if(commandSign.equals("<")) inputData(input, i);
 		else if(commandSign.equals("@")) printData(input);
 		else if(commandSign.equals("?")) searchPattern(input);
 	}
 	
+	private static final int TABEL_SIZE = 100;
+	private static final int K = 6;
+	private static Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
+	
 	public static void convertFile(String fileName) throws IOException {
-		
 		File file = new File(fileName);
 		FileReader fReader = new FileReader(file);
 		if(file.exists()) {
 			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line; 
+			String line = "";
+			int i = 1;
 			while((line = br.readLine()) != null) {
-				inputData(line);
+				System.out.println(line);
+				inputData(line, i++);	
 			}
+			br.close();
 		}
 	}
 	
-	public static void inputData(String input)
+	public static void inputData(String input, int i)
 	{
-		// TODO : 아래 문장을 삭제하고 구현해라.
-//		System.out.println("<< command 함수에서 " + input + " 명령을 처리할 예정입니다 >>");
-		
-		final int TABEL_SIZE = 100;
-		Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
+		System.out.println("i: " + i);
 		
 		// extract substring from input 
-		int i = 0;
-		final int K = 6;
 		for(int j=0; j<=input.length()-K; j++) {
-//			System.out.print(input.substring(j, j+k));
-			i++;
+//			System.out.println(input.substring(j, j+K));
 			String sixStr = input.substring(j, j+K);
 			int key = 0;
 			for(int l=0; l<sixStr.length(); l++) {
@@ -69,11 +70,10 @@ public class Matching
 			}
 			key %= 100;
 //			System.out.println(key);
-			if(h.get(key).isEmpty()) {
+			if(h.get(key) == null) {
 				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
 				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
 				h.put(key, hashTree);
-				
 			} else {
 				TreeNode treeNode = new TreeNode(sixStr, i, j+1); // same tree, diff node
 				ListNode listNode = new ListNode(i, j+1); 
@@ -100,7 +100,6 @@ class AVLTree<T> {
 //	}
 	
 	public AVLTree(TreeNode<T> root) {
-//		super();
 		this.root = root;
 	}
 	
@@ -113,24 +112,26 @@ class AVLTree<T> {
 	}
 	
 	public void insert(TreeNode<T> currNode, TreeNode<T> newTreeNode, ListNode<T> newListNode) {
-		if(currNode == null) { // currNode refers to root at first
-			currNode = newTreeNode;
-			return;
-		}
+//		if(currNode == null) { // currNode refers to root at first
+//			currNode = newTreeNode;
+//			return;
+//		} // insert하는 시점에는 무조건 해당 tree의 root가 존재 
 		
+//		System.out.println(newTreeNode.getValue());
+//		System.out.println(currNode.getValue());
+
 		// java String: lesser when it comes earlier		
 		if(newTreeNode.getValue().compareTo(currNode.getValue()) == -1) { // if new item is smaller than curr
-			
 			// insert left
 			currNode = currNode.getLeftChild();
 			insert(currNode, newTreeNode, newListNode);
 			
 			// rotate if needed
 			if(currNode.getLeftHeight() > currNode.getRightHeight() + 1) {
+//				System.out.println("error in 131");
 				this.rotateRight(currNode);
 			}
 		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) == 1) { // if new item is larger than curr
-			
 			// insert right
 			currNode = currNode.getRightChild();
 			insert(currNode, newTreeNode, newListNode);
