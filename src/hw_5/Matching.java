@@ -41,13 +41,15 @@ public class Matching
 	private static final int K = 6;
 	private static Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
 	
+//	private static int i = 1;
+//	private static int j = 1;
+	
 	public static void convertFile(String fileName) throws IOException {
 		File file = new File(fileName);
-		FileReader fReader = new FileReader(file);
 		if(file.exists()) {
 			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line = "";
 			int i = 1;
+			String line = "";
 			while((line = br.readLine()) != null) {
 				System.out.println(line);
 				inputData(line, i++);	
@@ -61,24 +63,29 @@ public class Matching
 		System.out.println("i: " + i);
 		
 		// extract substring from input 
-		for(int j=0; j<=input.length()-K; j++) {
-//			System.out.println(input.substring(j, j+K));
-			String sixStr = input.substring(j, j+K);
+		for(int j=1; j<=input.length()-K+1; j++) {
+//			System.out.print(input.substring(j-1, j+K-1));
+			String sixStr = input.substring(j-1, j+K-1);
 			int key = 0;
-			for(int l=0; l<sixStr.length(); l++) {
-				key += sixStr.charAt(l);
+			for(int k=0; k<sixStr.length(); k++) {
+				key += sixStr.charAt(k);
 			}
 			key %= 100;
-//			System.out.println(key);
+//			System.out.print(" / " + key + " / ");
 			if(h.get(key) == null) {
-				TreeNode treeNode = new TreeNode(sixStr, i, j+1);
+//				System.out.println("new");
+//				System.out.println("i: " + i + ", j: " + j);
+				TreeNode treeNode = new TreeNode(sixStr, i, j);
 				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
 				h.put(key, hashTree);
 			} else {
-				TreeNode treeNode = new TreeNode(sixStr, i, j+1); // same tree, diff node
-				ListNode listNode = new ListNode(i, j+1); 
+//				System.out.println("already");
+//				System.out.println("i: " + i + ", j: " + j);
+				System.out.println("==========");
+				TreeNode treeNode = new TreeNode(sixStr, i, j); // same tree, diff node
+//				ListNode listNode = new ListNode(i, j); 
 				TreeNode currRoot = h.get(key).getRoot();
-				h.get(key).insert(currRoot, treeNode, listNode);
+				h.get(key).insert(currRoot, treeNode);
 			}
 		}
 	}
@@ -95,9 +102,9 @@ public class Matching
 class AVLTree<T> {
 	private TreeNode<T> root;
 	
-//	public AVLTree() {
-//		root = null;
-//	}
+	public AVLTree() {
+		root = null;
+	}
 	
 	public AVLTree(TreeNode<T> root) {
 		this.root = root;
@@ -111,37 +118,60 @@ class AVLTree<T> {
 		this.root = root;
 	}
 	
-	public void insert(TreeNode<T> currNode, TreeNode<T> newTreeNode, ListNode<T> newListNode) {
-//		if(currNode == null) { // currNode refers to root at first
-//			currNode = newTreeNode;
+	public void insert(TreeNode<T> currNode, TreeNode<T> newTreeNode) {
+//		if(root == null) { // currNode refers to root at first
+//			root = newTreeNode;
 //			return;
-//		} // insert하는 시점에는 무조건 해당 tree의 root가 존재 
+//		} 
 		
-//		System.out.println(newTreeNode.getValue());
-//		System.out.println(currNode.getValue());
+		System.out.println("currNode: " + currNode.getValue());		
+		System.out.println("newTreeNode: " + newTreeNode.getValue());
 
 		// java String: lesser when it comes earlier		
-		if(newTreeNode.getValue().compareTo(currNode.getValue()) == -1) { // if new item is smaller than curr
+		if(newTreeNode.getValue().compareTo(currNode.getValue()) < 0) { // if new item is smaller than curr
+			
+			System.out.print("insert left/ ");
+			
 			// insert left
-			currNode = currNode.getLeftChild();
-			insert(currNode, newTreeNode, newListNode);
+			if(currNode.getLeftChild() == null) {
+				currNode.setLeftChild(newTreeNode);
+				System.out.println("works");
+			} else {
+//				currNode = 
+				insert(currNode.getLeftChild(), newTreeNode);
+			}
+			
+			System.out.print("left:" + currNode.getLeftHeight());
+			System.out.println("/ right:" + currNode.getRightHeight());			
 			
 			// rotate if needed
 			if(currNode.getLeftHeight() > currNode.getRightHeight() + 1) {
-//				System.out.println("error in 131");
+				System.out.println("rotate right");
 				this.rotateRight(currNode);
 			}
-		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) == 1) { // if new item is larger than curr
+		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) > 0) { // if new item is larger than curr
+			System.out.print("insert right/ ");
+
 			// insert right
-			currNode = currNode.getRightChild();
-			insert(currNode, newTreeNode, newListNode);
+			if(currNode.getRightChild() == null) {
+				currNode.setRightChild(newTreeNode);
+				System.out.println("works");
+			} else {
+//				currNode = 
+				insert(currNode.getRightChild(), newTreeNode);
+			}
+			
+			System.out.print("left:" + currNode.getLeftHeight());
+			System.out.println("/ right:" + currNode.getRightHeight());
 			
 			// rotate if needed
 			if(currNode.getRightHeight() > currNode.getLeftHeight() + 1) {
+				System.out.println("rotate left");
 				this.rotateLeft(currNode);
 			}			
 		} else { // if new item is equal to current node
-			currNode.getItemList().add(newListNode);
+			System.out.println("same value, add to list");
+			currNode.getItemList().add(newTreeNode);
 		}
 	}
 
@@ -173,7 +203,9 @@ class AVLTree<T> {
 
 class TreeNode<T> {	
 	private String value;
-	private LinkedList<ListNode> itemList;
+	private int i;
+	private int j;
+	private LinkedList<TreeNode> itemList;
 	private TreeNode<T> leftChild;
 	private TreeNode<T> rightChild;	
 	private int leftHeight;
@@ -181,11 +213,16 @@ class TreeNode<T> {
 	
 	public TreeNode(String value, int i, int j) {
 		this.value = value;
-		this.itemList = new LinkedList<ListNode>();
-		ListNode nodeItem = new ListNode(i, j);
+		this.i = i;
+		this.j = j;
+		this.itemList = new LinkedList<TreeNode>();
+		this.leftHeight = 0;
+		this.rightHeight = 0;
+//		ListNode nodeItem = new ListNode(i, j);
 		
 		// add to linkedlist right after tree node is created
-		itemList.add(nodeItem);
+//		itemList.add(nodeItem);
+		
 	}
 	
 	public String getValue() {
@@ -196,11 +233,11 @@ class TreeNode<T> {
 		this.value = value;
 	}
 
-	public LinkedList<ListNode> getItemList() {
+	public LinkedList<TreeNode> getItemList() {
 		return itemList;	
 	}
 
-	public void setItemList(LinkedList<ListNode> itemList) {
+	public void setItemList(LinkedList<TreeNode> itemList) {
 		this.itemList = itemList;
 	}
 
@@ -222,44 +259,44 @@ class TreeNode<T> {
 
 	// dunno
 	public int getLeftHeight() {
-		if (this == null) return -1;
+		if (this.getLeftChild() == null) return 1;
 		this.leftHeight = 1 + Math.max(this.getLeftChild().getLeftHeight(), this.getLeftChild().getRightHeight());
 		return leftHeight;
 	}
 
 	public int getRightHeight() {
-		if (this == null) return -1;
+		if (this.getRightChild() == null) return 1;
 		this.rightHeight = 1 + Math.max(this.getRightChild().getLeftHeight(), this.getRightChild().getRightHeight());
 		return rightHeight;
 	}
 
 }
 
-class ListNode<T> {
-//	private String item;
-	private int i;
-	private int j;
-	
-	public ListNode(int i, int j) {
-//		this.item = item;
-		this.i = i;
-		this.j = j;
-	}
-
-	public int getI() {
-		return i;
-	}
-
-	public void setI(int i) {
-		this.i = i;
-	}
-
-	public int getJ() {
-		return j;
-	}
-
-	public void setJ(int j) {
-		this.j = j;
-	}
-	
-}
+//class ListNode<T> {
+////	private String item;
+//	private int i;
+//	private int j;
+//	
+//	public ListNode(int i, int j) {
+////		this.item = item;
+//		this.i = i;
+//		this.j = j;
+//	}
+//
+//	public int getI() {
+//		return i;
+//	}
+//
+//	public void setI(int i) {
+//		this.i = i;
+//	}
+//
+//	public int getJ() {
+//		return j;
+//	}
+//
+//	public void setJ(int j) {
+//		this.j = j;
+//	}
+//	
+//}
