@@ -64,28 +64,26 @@ public class Matching
 		
 		// extract substring from input 
 		for(int j=1; j<=input.length()-K+1; j++) {
-//			System.out.print(input.substring(j-1, j+K-1));
 			String sixStr = input.substring(j-1, j+K-1);
+			System.out.print(sixStr);
 			int key = 0;
 			for(int k=0; k<sixStr.length(); k++) {
 				key += sixStr.charAt(k);
 			}
 			key %= 100;
-//			System.out.print(" / " + key + " / ");
+			System.out.print("/" + key + "/");
 			if(h.get(key) == null) {
-//				System.out.println("new");
-//				System.out.println("i: " + i + ", j: " + j);
+				System.out.println("new");
+				System.out.println("i: " + i + ", j: " + j);
 				TreeNode treeNode = new TreeNode(sixStr, i, j);
 				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
 				h.put(key, hashTree);
 			} else {
-//				System.out.println("already");
-//				System.out.println("i: " + i + ", j: " + j);
-				System.out.println("==========");
+				System.out.println("already");
+				System.out.println("i: " + i + ", j: " + j);
 				TreeNode treeNode = new TreeNode(sixStr, i, j); // same tree, diff node
-//				ListNode listNode = new ListNode(i, j); 
-				TreeNode currRoot = h.get(key).getRoot();
-				h.get(key).insert(currRoot, treeNode);
+//				TreeNode currRoot = h.get(key).getRoot();
+				h.get(key).insert(treeNode);
 			}
 		}
 	}
@@ -118,81 +116,74 @@ class AVLTree<T> {
 		this.root = root;
 	}
 	
-	public void insert(TreeNode<T> currNode, TreeNode<T> newTreeNode) {
-//		if(root == null) { // currNode refers to root at first
-//			root = newTreeNode;
-//			return;
-//		} 
+	public void insert(TreeNode<T> newTreeNode) {
+		root = insertItem(root, newTreeNode);
+	}
+	
+	public TreeNode<T> insertItem(TreeNode<T> currNode, TreeNode<T> newTreeNode) {
 		
-		System.out.println("currNode: " + currNode.getValue());		
-		System.out.println("newTreeNode: " + newTreeNode.getValue());
+		if(currNode == null) { // currNode refers to root at first
+			return newTreeNode;
+		} 
 
-		// java String: lesser when it comes earlier		
-		if(newTreeNode.getValue().compareTo(currNode.getValue()) < 0) { // if new item is smaller than curr
-			
-			System.out.print("insert left/ ");
-			
-			// insert left
-			if(currNode.getLeftChild() == null) {
-				currNode.setLeftChild(newTreeNode);
-				System.out.println("works");
-			} else {
-//				currNode = 
-				insert(currNode.getLeftChild(), newTreeNode);
-			}
-			
-			System.out.print("left:" + currNode.getLeftHeight());
-			System.out.println("/ right:" + currNode.getRightHeight());			
+		if(newTreeNode.getValue().compareTo(currNode.getValue()) < 0) {
+			currNode.setLeftChild(insertItem(currNode.getLeftChild(), newTreeNode));
+
+			System.out.print(root.getValue());
+			System.out.print("/ left:" + root.getLeftHeight());
+			System.out.print("/ right:" + root.getRightHeight());		
+			System.out.println("/ height:" + root.getHeight());			
 			
 			// rotate if needed
 			if(currNode.getLeftHeight() > currNode.getRightHeight() + 1) {
 				System.out.println("rotate right");
-				this.rotateRight(currNode);
-			}
-		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) > 0) { // if new item is larger than curr
-			System.out.print("insert right/ ");
-
-			// insert right
-			if(currNode.getRightChild() == null) {
-				currNode.setRightChild(newTreeNode);
-				System.out.println("works");
+				return rotateRight(currNode);
 			} else {
-//				currNode = 
-				insert(currNode.getRightChild(), newTreeNode);
+				return currNode;
 			}
 			
-			System.out.print("left:" + currNode.getLeftHeight());
-			System.out.println("/ right:" + currNode.getRightHeight());
+		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) > 0) { 
+			currNode.setRightChild(insertItem(currNode.getRightChild(), newTreeNode));
+
+			System.out.print(root.getValue());
+			System.out.print("/ left:" + root.getLeftHeight());
+			System.out.print("/ right:" + root.getRightHeight());
+			System.out.println("/ height:" + root.getHeight());			
 			
 			// rotate if needed
-			if(currNode.getRightHeight() > currNode.getLeftHeight() + 1) {
+			if(root.getRightHeight() > root.getLeftHeight() + 1) {
 				System.out.println("rotate left");
-				this.rotateLeft(currNode);
-			}			
+				return rotateLeft(currNode);
+				
+			} else {
+				return currNode;
+			}
+			
 		} else { // if new item is equal to current node
 			System.out.println("same value, add to list");
 			currNode.getItemList().add(newTreeNode);
+			System.out.println(currNode.getItemList().size());	
+			return currNode;
 		}
+	
 	}
 
 	public boolean isEmpty() {
 		return root == null;
 	}
-
-//	public TreeNode<T> search(TreeNode<T> currNode) {
-//		
-//	}
 	
-	public void rotateLeft(TreeNode<T> currNode) {
-		TreeNode<T> tmpNode = this.root;
-		this.root = this.root.getRightChild();
-		this.root.setLeftChild(tmpNode);
+	public TreeNode<T> rotateLeft(TreeNode<T> currNode) {
+		TreeNode<T> tmpNode = currNode.getRightChild();
+		currNode.setRightChild(tmpNode.getLeftChild());
+		tmpNode.setLeftChild(currNode);
+		return tmpNode;
 	}
 	
-	public void rotateRight(TreeNode<T> currNode) {
-		TreeNode<T> tmpNode = this.root;
-		this.root = this.root.getLeftChild();
-		this.root.setRightChild(tmpNode);
+	public TreeNode<T> rotateRight(TreeNode<T> currNode) {
+		TreeNode<T> tmpNode = currNode.getLeftChild();
+		currNode.setLeftChild(tmpNode.getRightChild());
+		tmpNode.setRightChild(currNode);
+		return tmpNode;
 	}
 	
 	public void traverse() {
@@ -218,10 +209,8 @@ class TreeNode<T> {
 		this.itemList = new LinkedList<TreeNode>();
 		this.leftHeight = 0;
 		this.rightHeight = 0;
-//		ListNode nodeItem = new ListNode(i, j);
 		
-		// add to linkedlist right after tree node is created
-//		itemList.add(nodeItem);
+		this.itemList.add(this); // wow it works! 
 		
 	}
 	
@@ -247,6 +236,7 @@ class TreeNode<T> {
 
 	public void setLeftChild(TreeNode<T> leftChild) {
 		this.leftChild = leftChild;
+		this.leftHeight = leftChild == null ? 0 : leftChild.getHeight();
 	}
 
 	public TreeNode<T> getRightChild() {
@@ -255,21 +245,43 @@ class TreeNode<T> {
 
 	public void setRightChild(TreeNode<T> rightChild) {
 		this.rightChild = rightChild;
+		this.rightHeight = rightChild == null ? 0 : rightChild.getHeight();
 	}
 
-	// dunno
 	public int getLeftHeight() {
-		if (this.getLeftChild() == null) return 1;
-		this.leftHeight = 1 + Math.max(this.getLeftChild().getLeftHeight(), this.getLeftChild().getRightHeight());
+//		if (leftChild == null) return 0;
+//		this.leftHeight = 1 + Math.max(this.getLeftChild().getLeftHeight(), this.getLeftChild().getRightHeight());
+//		return leftChild.getHeight();
 		return leftHeight;
 	}
 
 	public int getRightHeight() {
-		if (this.getRightChild() == null) return 1;
-		this.rightHeight = 1 + Math.max(this.getRightChild().getLeftHeight(), this.getRightChild().getRightHeight());
+//		if (rightChild == null) return 0;
+//		this.rightHeight = 1 + Math.max(this.getRightChild().getLeftHeight(), this.getRightChild().getRightHeight());
+//		return rightChild.getHeight();
 		return rightHeight;
 	}
+	
+	public int getHeight() {
+		return Math.max(leftHeight, rightHeight)+1;
+	}
 
+	public int getI() {
+		return i;
+	}
+
+	public void setI(int i) {
+		this.i = i;
+	}
+
+	public int getJ() {
+		return j;
+	}
+
+	public void setJ(int j) {
+		this.j = j;
+	}
+	
 }
 
 //class ListNode<T> {
