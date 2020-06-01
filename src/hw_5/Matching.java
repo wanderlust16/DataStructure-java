@@ -28,21 +28,16 @@ public class Matching
 	private static void command(String input) throws IOException {
 		String commandSign = String.valueOf(input.charAt(0));
 		String filePath = input.substring(2); // user later(file input)
-//		input = input.substring(2); 
+		input = input.substring(2); 
 		
 		if(commandSign.equals("<")) convertFile(filePath);
-//		int i = 1;
-//		if(commandSign.equals("<")) inputData(input, i);
 		else if(commandSign.equals("@")) printData(input);
 		else if(commandSign.equals("?")) searchPattern(input);
 	}
 	
 	private static final int TABEL_SIZE = 100;
 	private static final int K = 6;
-	private static Hashtable<Integer, AVLTree> h = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
-	
-//	private static int i = 1;
-//	private static int j = 1;
+	private static Hashtable<Integer, AVLTree> ht = new Hashtable<Integer, AVLTree>(TABEL_SIZE);
 	
 	public static void convertFile(String fileName) throws IOException {
 		File file = new File(fileName);
@@ -72,31 +67,33 @@ public class Matching
 			}
 			key %= 100;
 			System.out.print("/" + key + "/");
-			if(h.get(key) == null) {
+			if(ht.get(key) == null) {
 				System.out.println("new");
 				System.out.println("i: " + i + ", j: " + j);
 				TreeNode treeNode = new TreeNode(sixStr, i, j);
 				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
-				h.put(key, hashTree);
+				ht.put(key, hashTree);
 			} else {
 				System.out.println("already");
 				System.out.println("i: " + i + ", j: " + j);
 				TreeNode treeNode = new TreeNode(sixStr, i, j); // same tree, diff node
 //				TreeNode currRoot = h.get(key).getRoot();
-				h.get(key).insert(treeNode);
+				ht.get(key).insert(treeNode);
 			}
 		}
 	}
 	
 	public static void printData(String input) {
-		
+//		System.out.println(ht.containsKey(input));
+		AVLTree<TreeNode> at = ht.get(Integer.parseInt(input));
+		at.preorder(at.getRoot());
 	}
 	
 	public static void searchPattern(String input) {
 		
 	}
 }
-
+	
 class AVLTree<T> {
 	private TreeNode<T> root;
 	
@@ -186,8 +183,12 @@ class AVLTree<T> {
 		return tmpNode;
 	}
 	
-	public void traverse() {
-		
+	public void preorder(TreeNode<T> root) {
+		if(root != null) {
+			System.out.print(root.getValue() + " ");
+			preorder(root.getLeftChild());
+			preorder(root.getRightChild());
+		}
 	}
 	
 }
