@@ -55,42 +55,85 @@ public class Matching
 	
 	public static void inputData(String input, int i)
 	{
-		System.out.println("i: " + i);
-		
-		// extract substring from input 
 		for(int j=1; j<=input.length()-K+1; j++) {
 			String sixStr = input.substring(j-1, j+K-1);
-			System.out.print(sixStr);
 			int key = 0;
 			for(int k=0; k<sixStr.length(); k++) {
 				key += sixStr.charAt(k);
 			}
 			key %= 100;
-			System.out.print("/" + key + "/");
 			if(ht.get(key) == null) {
-				System.out.println("new");
-				System.out.println("i: " + i + ", j: " + j);
+
 				TreeNode treeNode = new TreeNode(sixStr, i, j);
 				AVLTree hashTree = new AVLTree(treeNode); // new treeNode set as new AVLTree's root
 				ht.put(key, hashTree);
 			} else {
-				System.out.println("already");
-				System.out.println("i: " + i + ", j: " + j);
 				TreeNode treeNode = new TreeNode(sixStr, i, j); // same tree, diff node
-//				TreeNode currRoot = h.get(key).getRoot();
 				ht.get(key).insert(treeNode);
 			}
 		}
 	}
 	
 	public static void printData(String input) {
-//		System.out.println(ht.containsKey(input));
+		if(Integer.parseInt(input) == 0) {
+			System.out.println("EMPTY");
+			return;
+		}
 		AVLTree<TreeNode> at = ht.get(Integer.parseInt(input));
 		at.preorder(at.getRoot());
 	}
-	
-	public static void searchPattern(String input) {
 		
+	public static void searchPattern(String input) {
+		int i = 1;
+		String startStr = input.substring(0, 6);
+		
+		if(input.length() == 6) {
+			TreeNode tn = searchItem(input);
+			LinkedList<TreeNode> tnList = tn.getItemList();
+			for(TreeNode subTn : tnList) {
+				System.out.println("(" + subTn.getI() + ", " + subTn.getJ() + ")");	
+			}
+		}
+		
+		while(i < input.length()-K+1) {
+			String prevStr = input.substring(i-1, i+K-1);
+			String currStr = input.substring(i, i+K);
+						
+			TreeNode prevTn = searchItem(prevStr);
+			TreeNode currTn = searchItem(currStr);
+			
+			if(prevTn == null || currTn == null) {
+				System.out.println("(0, 0)"); 
+				break;
+			}
+			
+//			if(prevTn.getI() == currTn.getI() && prevTn.getJ() + 1 == currTn.getJ()) System.out.println("true");
+			if(i == input.length()-K) {
+				TreeNode tn = searchItem(startStr);
+				LinkedList<TreeNode> tnList = tn.getItemList();
+				for(TreeNode subTn : tnList) {
+					System.out.println("(" + subTn.getI() + ", " + subTn.getJ() + ")");	
+				}
+			}
+			
+			i++;
+		}
+	}
+	
+	private static TreeNode searchItem(String input) {
+		int key = 0;
+		for(int k=0; k<input.length(); k++) {
+			key += input.charAt(k);
+		}
+		key %= 100;
+//		System.out.println(key);
+		
+		if(ht.get(key) != null) {
+			AVLTree<TreeNode> at = ht.get(key);
+			return at.search(at.getRoot(), input);			
+		} else {
+			return null;
+		}		
 	}
 }
 	
@@ -117,7 +160,7 @@ class AVLTree<T> {
 		root = insertItem(root, newTreeNode);
 	}
 	
-	public TreeNode<T> insertItem(TreeNode<T> currNode, TreeNode<T> newTreeNode) {
+	private TreeNode<T> insertItem(TreeNode<T> currNode, TreeNode<T> newTreeNode) {
 		
 		if(currNode == null) { // currNode refers to root at first
 			return newTreeNode;
@@ -126,14 +169,8 @@ class AVLTree<T> {
 		if(newTreeNode.getValue().compareTo(currNode.getValue()) < 0) {
 			currNode.setLeftChild(insertItem(currNode.getLeftChild(), newTreeNode));
 
-			System.out.print(root.getValue());
-			System.out.print("/ left:" + root.getLeftHeight());
-			System.out.print("/ right:" + root.getRightHeight());		
-			System.out.println("/ height:" + root.getHeight());			
-			
 			// rotate if needed
 			if(currNode.getLeftHeight() > currNode.getRightHeight() + 1) {
-				System.out.println("rotate right");
 				return rotateRight(currNode);
 			} else {
 				return currNode;
@@ -142,14 +179,8 @@ class AVLTree<T> {
 		} else if(newTreeNode.getValue().compareTo(currNode.getValue()) > 0) { 
 			currNode.setRightChild(insertItem(currNode.getRightChild(), newTreeNode));
 
-			System.out.print(root.getValue());
-			System.out.print("/ left:" + root.getLeftHeight());
-			System.out.print("/ right:" + root.getRightHeight());
-			System.out.println("/ height:" + root.getHeight());			
-			
 			// rotate if needed
 			if(root.getRightHeight() > root.getLeftHeight() + 1) {
-				System.out.println("rotate left");
 				return rotateLeft(currNode);
 				
 			} else {
@@ -157,9 +188,7 @@ class AVLTree<T> {
 			}
 			
 		} else { // if new item is equal to current node
-			System.out.println("same value, add to list");
 			currNode.getItemList().add(newTreeNode);
-			System.out.println(currNode.getItemList().size());	
 			return currNode;
 		}
 	
@@ -191,6 +220,16 @@ class AVLTree<T> {
 		}
 	}
 	
+	public TreeNode<T> search(TreeNode<T> root, String searchKey) {
+		if(root == null) return null;
+		
+		if(searchKey.equals(root.getValue())) return root;
+		else if(searchKey.compareTo(root.getValue()) < 0) {
+			return search(root.getLeftChild(), searchKey);
+		} else {
+			return search(root.getRightChild(), searchKey);
+		}
+	}	
 }
 
 class TreeNode<T> {	
@@ -212,7 +251,6 @@ class TreeNode<T> {
 		this.rightHeight = 0;
 		
 		this.itemList.add(this); // wow it works! 
-		
 	}
 	
 	public String getValue() {
@@ -250,16 +288,10 @@ class TreeNode<T> {
 	}
 
 	public int getLeftHeight() {
-//		if (leftChild == null) return 0;
-//		this.leftHeight = 1 + Math.max(this.getLeftChild().getLeftHeight(), this.getLeftChild().getRightHeight());
-//		return leftChild.getHeight();
 		return leftHeight;
 	}
 
 	public int getRightHeight() {
-//		if (rightChild == null) return 0;
-//		this.rightHeight = 1 + Math.max(this.getRightChild().getLeftHeight(), this.getRightChild().getRightHeight());
-//		return rightChild.getHeight();
 		return rightHeight;
 	}
 	
@@ -284,32 +316,3 @@ class TreeNode<T> {
 	}
 	
 }
-
-//class ListNode<T> {
-////	private String item;
-//	private int i;
-//	private int j;
-//	
-//	public ListNode(int i, int j) {
-////		this.item = item;
-//		this.i = i;
-//		this.j = j;
-//	}
-//
-//	public int getI() {
-//		return i;
-//	}
-//
-//	public void setI(int i) {
-//		this.i = i;
-//	}
-//
-//	public int getJ() {
-//		return j;
-//	}
-//
-//	public void setJ(int j) {
-//		this.j = j;
-//	}
-//	
-//}
